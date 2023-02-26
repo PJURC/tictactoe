@@ -18,30 +18,35 @@ const Gameboard = (() => {
     };
     // Check whether the current player just won 
     const checkWin = () => {
-    // Loop through each group of winning indexes
-    for (let i = 0; i < winning_indexes.length; i++) {
-        let sum = 0;
-        let qualify = true;
-        // Loop through each index of the group
-        for (let j = 0; j < winning_indexes[i].length; j++) {
-            // If a blank value is found, skip that winning condition
-            if (board[winning_indexes[i][j]] == "") {
-                qualify = false;
-                continue;
-            }
-            sum += board[winning_indexes[i][j]];
+        // Loop through each group of winning indexes
+        for (let i = 0; i < winning_indexes.length; i++) {
+            let sum = 0;
+            let qualify = true;
+            // Loop through each index of the group
+            for (let j = 0; j < winning_indexes[i].length; j++) {
+                // If a blank value is found, skip that winning condition
+                if (board[winning_indexes[i][j]] == "") {
+                    qualify = false;
+                    continue;
+                }
+                sum += board[winning_indexes[i][j]];
+            };
+            if (sum > 0 && sum % 3 == 0 && qualify) {
+                DisplayController.announceWinner();
+            };
         };
-        if (sum > 0 && sum % 3 == 0 && qualify) {
-            DisplayController.announceWinner();
+    };
+    const checkTie = () => {
+        if (!board.includes("")) {
+            DisplayController.announceTie();
         };
-    }
-        
-    }
+    };
     return {
         marker,
         board,
         placeMarker,
         checkWin,
+        checkTie,
     };
 })();
 
@@ -74,12 +79,17 @@ const DisplayController = (() => {
         winner_element.innerHTML = `Player ${current_player.mark_id} wins!`;
         player_turn.innerHTML = "";
     }
+    const announceTie = () => {
+        winner_element.innerHTML = "It's a tie!"
+        player_turn.innerHTML = "";
+    }
     return {
         winner_element,
         displayPlayer,
         renderBoard,
         restartGame,
         announceWinner,
+        announceTie,
     };
 })();
 
@@ -106,6 +116,7 @@ for (let i = 0; i < tiles.length; i++) {
         if (Gameboard.board[tile_id] === "" && DisplayController.winner_element.innerHTML == "") {
             Gameboard.placeMarker(tile_id, current_player.mark_id);
             Gameboard.checkWin();
+            Gameboard.checkTie();
             // Switch player
             if (current_player.mark_id == 1) {
                 current_player = player_two;
